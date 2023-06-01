@@ -13,7 +13,9 @@ function Profile() {
     password: "",
     role: "",
     hobbies: "",
+    access_by_manager : false
   });
+
 
   const handleChange = (e) => {
     setCredential({
@@ -26,6 +28,8 @@ function Profile() {
           : e.target.value,
     });
   };
+
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,20 +46,27 @@ function Profile() {
     }
   };
 
-  const getUser = async () => {
+  const getUser = async (user_id) => {
     let headers = {
       "x-access-token": state.access_token,
     };
     try {
-      let res = await fetchingUserProfile({headers});
-      setCredential({ ...res });
+      let res = await fetchingUserProfile({headers, body : {_id : user_id} });
+      setCredential({ access_by_manager : user_id ? true : false , ...res });
     } catch (error) {
       console.log(error);
     }
   };
 
   useEffect(() => {
-    getUser();
+    console.log("loc ", window.location)
+    let {search} = window.location ;
+    if(search){
+      let searchArr =  search.split("=")
+      getUser(searchArr[1]);
+    }else{
+      getUser();
+    }
   }, []);
 
   if( !state.access_token){
@@ -65,7 +76,7 @@ function Profile() {
   return (
     <div>
       <h3>Profile</h3>
-      <AuthScreen credential={credential} handleSubmit={handleSubmit} handleChange={handleChange} btnText="Profile" state={state}/>
+      <AuthScreen credential={credential} handleSubmit={handleSubmit} handleChange={handleChange} btnText="Update" state={state}/>
     </div>
   );
 }

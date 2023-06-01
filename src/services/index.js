@@ -25,25 +25,36 @@ export const login = async ({headers, body}) => {
     const axiosClient = new AxiosClient({headers});
     const res = await axiosClient.get("/getuser?_id="+body?._id)
   
-  
     return res.data 
   }
 
   
 
-export const fetchingDepartments = async ({access_token}) => {
-    const axiosClient = new AxiosClient({access_token});
+export const fetchingDepartments = async ({headers}) => {
+    const axiosClient = new AxiosClient({headers});
     const res = await axiosClient.get("/departments")
-  
-  
     return res.data 
 }
+
+export const fetchingEmployees = async ({headers}) => {
+  const axiosClient = new AxiosClient({headers});
+  const res = await axiosClient.get("/getallusers")
+  return res.data 
+}
+
 
 
 export const updateUser = async ({headers , body}) => {
   const axiosClient = new AxiosClient({headers});
-  const res = await axiosClient.put("/update-emp?_id="+body._id, body)
+  const res = await axiosClient.put("/update-user/"+body._id, body)
 
 
   return res.data 
 }
+
+export const removeEmpFromDepartment = async ({headers , body}) => {
+  const axiosClient = new AxiosClient({headers});
+  const res = await axiosClient.put("/department/remove_emp", body)
+  return res.data 
+}
+

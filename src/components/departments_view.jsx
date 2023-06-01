@@ -45,16 +45,19 @@ export default function DepartmentsList({
       headerName: "Employees",
       description: "This column has a value getter and is not sortable.",
       width: 300,
-      renderCell: (params) => (
-        <div>
-          {params?.row?.employees?.map(({name}) => (
-            <Chip key={name} label={name} style={{ margin: 2 }}
-            onClick={handleEmpView}
-            onDelete={handleEmpRemove}
-            />
-          ))}
-        </div>
-      ),
+      renderCell: (params) =>{
+        console.log(params)
+        return  (
+          <div>
+            {params?.row?.employees?.map(({_id, name}) => (
+              <Chip key={name} label={name} style={{ margin: 2 }}
+              onClick={() => handleEmpView(_id)}
+              onDelete={() => handleEmpRemove(params.row?.id, _id)}
+              />
+            ))}
+          </div>
+        )
+      }
     },
   ];
 
