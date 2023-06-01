@@ -1,4 +1,4 @@
-const {signupController, loginController, updateEmpController, getUserController } = require("../controllers")
+const {signupController, loginController, updateEmpController, getUserController, getAllUsersController } = require("../controllers")
 const { auth } = require("../middlewares")
 const { catchAsync } = require("../middlewares/catchAsync")
 
@@ -11,7 +11,9 @@ const userRoutes = (app) => {
 
     app.get("/getuser" , auth, catchAsync(getUserController))
 
-    app.put("/update-emp/:emp_id", catchAsync(updateEmpController))
+    app.get("/getallusers" , auth, catchAsync(getAllUsersController))
+
+    app.put("/update-user/:user_id", auth, catchAsync(updateEmpController))
 
 }
 

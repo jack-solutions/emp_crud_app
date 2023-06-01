@@ -1,6 +1,6 @@
-const { login, signup, updateEmployeeByManager, getUser } = require("./user");
+const { login, signup, updateEmployeeByManager, getUser, getAllUsers } = require("./user");
 const {generateToken} = require("../token");
-const { createDepartment, createCategory, updateDepartment, fetchingDepartments } = require("./management");
+const { createDepartment, createCategory, updateDepartment, fetchingDepartments, fetchingCategories, removeEmpFromDepartment, deleteCategory, deleteDepartment } = require("./management");
 const { ErrorHandler } = require("../error_handler");
 
 const controllers = {
@@ -31,21 +31,28 @@ const controllers = {
 
     },
 
+    getAllUsersController : async (req,res, next) => {
+        const {_id, role} = req.user || {}
+        if(role?.toLowerCase() == "manager"){
+            let result = await getAllUsers()
+            return res.send(result)
+        }else{
+            throw new ErrorHandler(403, "does not have permission")
+        }
+    },
+
     getUserController : async (req,res, next) => {
         const user_id = req.query._id ;
         const {_id, role} = req.user || {}
 
-
-        if(_id && user_id == "undefined"){
-            const user =   await getUser(_id.toString())
+        if(_id && (user_id == undefined || user_id == "undefined")){
+            const user =   await getUser(_id)
             return res.send(user)
-        }else if(role == "manager" || "Manager"){
-            const user =   await getUser(user_id)
-            const {password, ...rest} = user;
-            return res.send(user)
+        }else if(role?.toLowerCase() == "manager"){
+            user =   await getUser(user_id)
+            const {password, ...rest} = user?._doc || {};
+            return res.send(rest)
         }
-
-
     },
 
     updateEmpController : async (req,res,next) => {
@@ -53,10 +60,10 @@ const controllers = {
         const { password, name, email, ...rest} = req.body ;
 
        
-        if(user._id == req.params.emp_id ){
-            updatedEmp =  await updateEmployeeByManager(req.params.emp_id, req.body)
-        }else if(user?.role == "manager"){
-            updatedEmp =  await updateEmployeeByManager(req.params.emp_id, rest )
+        if(user?._id == req.params.user_id ){
+            updatedEmp =  await updateEmployeeByManager(req.params.user_id, req.body)
+        }else if(user?.role?.toLowerCase() == "manager"){
+            updatedEmp =  await updateEmployeeByManager(req.params.user_id, req.body)
         }
 
         return res.status(200).json({
@@ -69,7 +76,7 @@ const controllers = {
 
     createDepartmentController : async (req,res, next) => {
         const {role} = req.user ;
-        if(role == "Manager"){
+        if(role?.toLowerCase() !== "manager"){
             throw new ErrorHandler(401, "does not have permission.")
         }
 
@@ -83,6 +90,11 @@ const controllers = {
 
     updateDepartmentController : async (req,res, next) => {
         const {dep_id , ...updateItems} = req.body
+        const {role} = req.user ;
+        if(role?.toLowerCase() !== "manager"){
+            throw new ErrorHandler(401, "does not have permission.")
+        }
+
         const updateDep = await updateDepartment(dep_id, updateItems)
         return res.status(200).json({
             success : true,
@@ -91,7 +103,26 @@ const controllers = {
 
     },
 
+    removeEmpFromDepartmentController : async (req,res,next) => {
+        const {role} = req.user || {}
+        const {dep_id, emp_id} = req.body
+        if(role?.toLowerCase() !== "manager"){
+            throw new ErrorHandler(401, "does not have permission.")
+        }
+
+        await removeEmpFromDepartment({dep_id, emp_id })
+        return res.status(200).json({
+            success : true,
+            msg : "Successfully Updated.. ! "
+        })
+    },
+
     createCategoryController : async (req,res, next) => {
+        const {role} = req.user ;
+        if(role?.toLowerCase() !== "manager"){
+            throw new ErrorHandler(401, "does not have permission.")
+        }
+
         const user = await createCategory(req.body)
 
         return res.status(200).json({
@@ -102,11 +133,21 @@ const controllers = {
 
     fetchingDepartmentsController : async (req,res) => {
         const {role} = req.user ;
-        if(role == "Manager"){
-            throw new ErrorHandler(401, "does not have permission.")
+        if(role?.toLowerCase() !== "manager"){
+            new ErrorHandler(401, "does not have permission.")
         }
 
         const result = await fetchingDepartments();
+        res.send(result)
+    },
+
+    fetchingCategoriesController : async (req,res) => {
+        const {role} = req.user ;
+        if(role?.toLowerCase() !== "manager"){
+            new ErrorHandler(401, "does not have permission.")
+        }
+
+        const result = await fetchingCategories();
         res.send(result)
     },
 
@@ -114,7 +155,7 @@ const controllers = {
         const {role} = req.user ;
         const {dept_id} = req.params ;
 
-        if(role == "Manager"){
+        if(role?.toLowerCase() == "manager"){
             await deleteDepartment(dept_id)
             return res.status(200).json({
                 success : true,
@@ -129,7 +170,7 @@ const controllers = {
         const {role} = req.user ;
         const {cat_id} = req.params ;
 
-        if(role == "Manager"){
+        if(role?.toLowerCase() == "manager"){
             await deleteCategory(cat_id)
             return res.status(200).json({
                 success : true,

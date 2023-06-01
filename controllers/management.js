@@ -27,6 +27,13 @@ const fetchingDepartments = async () => {
     return departments
 }
 
+const fetchingCategories = async () => {
+    const categories = await Category.find() ;
+    console.log(categories)
+    return categories
+}
+
+
 const deleteDepartment = async dep_id => {
    const department =  await Department.findOneAndDelete({_id : dep_id});
 }
@@ -35,4 +42,8 @@ const deleteCategory = async cat_id => {
     const category =  await Category.findOneAndDelete({_id : cat_id});
  }
 
-module.exports = {createCategory , createDepartment, updateDepartment, fetchingDepartments, deleteDepartment, deleteCategory}
+ const removeEmpFromDepartment = async ({dep_id, emp_id}) => {
+    await Department.updateOne({_id : dep_id}, {"$pull" : {"employees" : emp_id}})
+ }
+
+module.exports = {createCategory , createDepartment, updateDepartment, fetchingDepartments, fetchingCategories, deleteDepartment, deleteCategory, removeEmpFromDepartment}
