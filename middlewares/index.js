@@ -12,7 +12,7 @@ const auth = (req, res, next) => {
   console.log("accessToken", accessToken, typeof accessToken); // returning string datatype null
 
   // if (!accessToken) {
-  if (accessToken == "null") {
+  if (accessToken == null || accessToken == "" || accessToken == undefined) {
     console.log("Invalid or Missing Auth Key.");
     return res
       .status(403)

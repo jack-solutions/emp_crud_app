@@ -46,8 +46,16 @@ const signup = async (body) => {
 
 }
 
-const getUser = async (_id) => {
-    const user = await User.findOne({_id});
+const getUser = async (id) => {
+    const user = await User.findById({_id : id?.toString().trim()}).populate({ path: 'category', select: 'name' }).populate({ path: 'department', select: 'name' }).exec(); 
+    if(!user){
+        throw new ErrorHandler(404, "User not found ... ") 
+    }
+    return user 
+}
+
+const getAllUsers = async () => {
+    const user = await User.find().populate({ path: 'category', select: 'name' }).populate({ path: 'department', select: 'name' }).exec(); 
     if(!user){
         throw new ErrorHandler(404, "User not found ... ") 
     }
@@ -62,4 +70,4 @@ const updateEmployeeByManager = async (_id , body) => {
 
 
 
-module.exports = {login , signup, getUser, updateEmployeeByManager}
+module.exports = {login , signup, getUser, getAllUsers, updateEmployeeByManager}

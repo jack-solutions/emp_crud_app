@@ -28,7 +28,7 @@ const userSchema = new Schema({
   },
   department: { type: Schema.Types.ObjectId, ref: 'Department' },
 
-  categories : { type: Schema.Types.ObjectId, ref: 'Category' }
+  category : { type: Schema.Types.ObjectId, ref: 'Category' }
 });
 
 module.exports = mongoose.model('User', userSchema);
